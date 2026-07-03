@@ -1,0 +1,13 @@
+{
+  "name": "tg-riskbot",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "Telegram bot: instant rug/honeypot risk reports for EVM tokens and TON jettons",
+  "scripts": {
+    "start": "node bot.mjs"
+  },
+  "dependencies": {
+    "grammy": "^1.30.0"
+  }
+}
