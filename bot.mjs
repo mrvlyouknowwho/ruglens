@@ -119,8 +119,15 @@ async function sendReport(ctx, kind, address, chain) {
   }
 }
 
-bot.command('start', (ctx) => {
+bot.command('start', async (ctx) => {
   if (ctx.match === 'buy') return ctx.reply(msg(ctx).buy, { reply_markup: buyKeyboard(ctx) });
+  const hit = detectAddress(ctx.match || '');
+  if (hit && hit.kind !== 'sol' && !throttled(ctx.from.id)) {
+    if (hit.kind === 'ton') return sendReport(ctx, 'ton', hit.address);
+    let chains = [];
+    try { chains = await resolveEvmChains(hit.address); } catch {}
+    if (chains.length) return sendReport(ctx, 'evm', hit.address, chains[0].chain);
+  }
   return ctx.reply(msg(ctx).start(freeLimit()));
 });
 bot.command('help', (ctx) => ctx.reply(msg(ctx).help(freeLimit())));
