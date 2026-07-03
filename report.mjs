@@ -1,3 +1,5 @@
+const PROMO_CHANNEL = process.env.PROMO_CHANNEL || 'FreshPoolsFeed';
+
 const FLAG_TEXT = {
   en: {
     static_honeypot: '🚨 Flagged as honeypot (static analysis)',
@@ -151,7 +153,7 @@ export function formatEvmReport(r, lang, botUsername) {
   lines.push(`🧾 ${t.supply}: ${t.open_source} ${bool(r.contract.openSource, t)} · ${t.proxy} ${bool(r.contract.proxy, t)} · ${t.mintable} ${bool(r.contract.mintable, t)}`);
   lines.push('');
   lines.push(`<i>${r.honeypot.simulated ? t.sim_basis : t.static_basis}. ${t.disclaimer}</i>`);
-  if (botUsername) lines.push(`🔍 @${botUsername}`);
+  if (botUsername) lines.push(`🔍 @${botUsername} · 📡 @${PROMO_CHANNEL}`);
   return lines.join('\n');
 }
 
@@ -181,6 +183,6 @@ export function formatTonReport(r, lang, botUsername) {
   lines.push(`🧾 ${t.supply}: ${t.mint_revoked} ${bool(r.mintRevoked, t)} · ${t.admin} ${bool(r.flags.includes('admin_present'), t)}`);
   lines.push('');
   lines.push(`<i>${t.disclaimer}</i>`);
-  if (botUsername) lines.push(`🔍 @${botUsername}`);
+  if (botUsername) lines.push(`🔍 @${botUsername} · 📡 @${PROMO_CHANNEL}`);
   return lines.join('\n');
 }

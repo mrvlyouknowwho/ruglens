@@ -15,19 +15,29 @@ const PACKS = {
   p500: { checks: 500, stars: 300 },
 };
 const ADMIN_ID = process.env.ADMIN_ID ? Number(process.env.ADMIN_ID) : null;
+const PROMO_CHANNEL = process.env.PROMO_CHANNEL || 'FreshPoolsFeed';
+
+const PROMO = {
+  en:
+    `\n\nMore free tools: @GasBelowBot (ETH gas alerts) · @FreshPoolsBot (fresh DEX pools) · @WalletPingAlertBot (wallet activity alerts)\n` +
+    `📡 Fresh pools hourly: @${PROMO_CHANNEL}`,
+  ru:
+    `\n\nЕщё бесплатные инструменты: @GasBelowBot (алерты газа ETH) · @FreshPoolsBot (свежие DEX-пулы) · @WalletPingAlertBot (алерты активности кошелька)\n` +
+    `📡 Свежие пулы ежечасно: @${PROMO_CHANNEL}`,
+};
 
 const MSG = {
   en: {
     start: (limit) =>
       `Send me a token contract address — I return an instant rug/honeypot risk report.\n\n` +
       `Supported: Ethereum, BSC, Base, Arbitrum, Polygon, Optimism, Avalanche + TON jettons.\n\n` +
-      `Free: ${limit} checks/day. /buy for more. /help for details.`,
+      `Free: ${limit} checks/day. /buy for more. /help for details.` + PROMO.en,
     help: (limit) =>
       `Paste a contract address (0x… for EVM chains, EQ…/UQ… for TON jettons).\n\n` +
       `I check: honeypot (static + live buy/sell simulation where available), taxes, ` +
       `owner powers, mint, blacklist, proxy, holder concentration, DEX liquidity.\n\n` +
       `Free: ${limit} checks/day, then paid packs (/buy). /balance shows what you have left.\n` +
-      `Payment issues: /paysupport`,
+      `Payment issues: /paysupport` + PROMO.en,
     balance: (u, limit) => `Today: ${Math.max(0, limit - u.usedToday)}/${limit} free checks left · paid credits: ${u.credits}`,
     buy: 'Extra check packs (paid in Telegram Stars):',
     pack: (p) => `${p.checks} checks — ${p.stars} ⭐`,
@@ -45,13 +55,13 @@ const MSG = {
     start: (limit) =>
       `Пришли мне адрес контракта токена — верну мгновенный отчёт о рисках (rug/honeypot).\n\n` +
       `Поддержка: Ethereum, BSC, Base, Arbitrum, Polygon, Optimism, Avalanche + TON-джеттоны.\n\n` +
-      `Бесплатно: ${limit} проверок в день. /buy — купить ещё. /help — подробности.`,
+      `Бесплатно: ${limit} проверок в день. /buy — купить ещё. /help — подробности.` + PROMO.ru,
     help: (limit) =>
       `Вставь адрес контракта (0x… для EVM-сетей, EQ…/UQ… для TON-джеттонов).\n\n` +
       `Проверяю: honeypot (статика + живая симуляция покупки/продажи где доступна), налоги, ` +
       `права владельца, минт, чёрные списки, proxy, концентрацию держателей, ликвидность на DEX.\n\n` +
       `Бесплатно: ${limit} проверок в день, дальше пакеты (/buy). /balance — остаток.\n` +
-      `Проблемы с оплатой: /paysupport`,
+      `Проблемы с оплатой: /paysupport` + PROMO.ru,
     balance: (u, limit) => `Сегодня: ${Math.max(0, limit - u.usedToday)}/${limit} бесплатных проверок · платных кредитов: ${u.credits}`,
     buy: 'Пакеты проверок (оплата в Telegram Stars):',
     pack: (p) => `${p.checks} проверок — ${p.stars} ⭐`,
