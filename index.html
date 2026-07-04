@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Honeypot Checker — Is This Token a Scam? | RugLens</title>
+<meta name="description" content="Free honeypot and rug-pull checker for EVM tokens and TON jettons. Paste a contract address and instantly see sell simulation, buy/sell tax, mint and ownership risks, holder concentration and liquidity. No sign-up.">
+<meta name="keywords" content="honeypot checker, rug pull checker, token scam checker, is this token a honeypot, can i sell this token, erc20 scam check, bsc honeypot, base token check, ton jetton scam">
+<link rel="canonical" href="https://mrvlyouknowwho.github.io/ruglens/">
+<meta property="og:title" content="Free Honeypot Checker — Is This Token a Scam?">
+<meta property="og:description" content="Paste a token contract address, get an instant rug-pull / honeypot risk report. EVM chains + TON. No sign-up.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"What is a honeypot token?","acceptedAnswer":{"@type":"Answer","text":"A honeypot token is a crypto token you can buy but cannot sell. The contract is written so that only the creator can sell, or so that sells revert or are taxed at close to 100%. Your money goes in and cannot come out."}},
+    {"@type":"Question","name":"How do I check if a token is a honeypot?","acceptedAnswer":{"@type":"Answer","text":"Paste the token contract address into a checker that runs a real sell simulation on-chain, reads the contract security flags (mintable supply, proxy, blacklist, ownership powers) and inspects holder concentration and liquidity. This page does all of that for free without a sign-up."}},
+    {"@type":"Question","name":"Is this honeypot checker free?","acceptedAnswer":{"@type":"Answer","text":"Yes. It runs entirely in your browser using public data from GoPlus, honeypot.is and DexScreener. No account, no wallet connection, no fee."}},
+    {"@type":"Question","name":"Which blockchains are supported?","acceptedAnswer":{"@type":"Answer","text":"Ethereum, BNB Chain (BSC), Base, Arbitrum, Polygon, Optimism and Avalanche for EVM tokens, plus TON jettons. The network is detected automatically from the address."}}
+  ]
+}
+</script>
+<style>
+  :root{
+    --bg:#0d1220; --panel:#151c2e; --panel2:#1b2438; --line:#26304a;
+    --text:#e7ecf5; --muted:#94a0b8; --accent:#4da3ff;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:760px;margin:0 auto;padding:32px 20px 64px}
+  header h1{font-size:1.9rem;line-height:1.2;margin:0 0 8px}
+  header p.sub{color:var(--muted);margin:0 0 28px;font-size:1.05rem}
+  .tool{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  input[type=text]{flex:1 1 320px;min-width:0;background:var(--panel2);border:1px solid var(--line);
+    color:var(--text);border-radius:10px;padding:13px 14px;font-size:1rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  select{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:0 12px;font-size:.95rem}
+  button.go{background:var(--accent);color:#04121f;border:0;border-radius:10px;padding:13px 22px;
+    font-size:1rem;font-weight:600;cursor:pointer;flex:0 0 auto}
+  button.go:disabled{opacity:.5;cursor:default}
+  .hint{color:var(--muted);font-size:.85rem;margin-top:10px}
+  #out{margin-top:22px}
+  .card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:14px}
+  .score{display:flex;align-items:center;gap:14px}
+  .badge{font-weight:700;font-size:1.05rem;padding:6px 14px;border-radius:999px;white-space:nowrap}
+  .b-ok{background:rgba(34,197,94,.15);color:var(--ok);border:1px solid rgba(34,197,94,.4)}
+  .b-warn{background:rgba(245,158,11,.15);color:var(--warn);border:1px solid rgba(245,158,11,.4)}
+  .b-bad{background:rgba(239,68,68,.15);color:var(--bad);border:1px solid rgba(239,68,68,.4)}
+  .tok{font-size:1.15rem;font-weight:600}
+  .addr{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:var(--muted);word-break:break-all}
+  ul.flags{list-style:none;padding:0;margin:12px 0 0}
+  ul.flags li{padding:5px 0;border-top:1px solid var(--line)}
+  ul.flags li:first-child{border-top:0}
+  .kv{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:12px;color:var(--muted);font-size:.9rem}
+  .kv b{color:var(--text);font-weight:600}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--line);
+    border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .cta{margin-top:18px;background:linear-gradient(135deg,#182a44,#14203a);border:1px solid var(--line);
+    border-radius:14px;padding:18px}
+  .cta a.btn{display:inline-block;background:var(--accent);color:#04121f;font-weight:600;
+    padding:10px 18px;border-radius:10px;margin-top:8px}
+  section.copy{margin-top:44px}
+  section.copy h2{font-size:1.3rem;margin:30px 0 8px}
+  section.copy h3{font-size:1.05rem;margin:22px 0 4px}
+  section.copy p,section.copy li{color:#c7d0e0}
+  footer{margin-top:48px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:18px}
+  .disc{color:var(--muted);font-size:.8rem;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Free Honeypot &amp; Rug-Pull Checker</h1>
+  <p class="sub">Paste any token contract address. Get an instant risk report — sell simulation, taxes, contract flags, holders, liquidity. No sign-up, no wallet connection.</p>
+</header>
+
+<div class="tool">
+  <div class="row">
+    <input id="addr" type="text" placeholder="0x… (EVM token) or EQ…/UQ… (TON jetton)" autocomplete="off" spellcheck="false">
+    <select id="chain">
+      <option value="auto">Auto-detect</option>
+      <option value="eth">Ethereum</option>
+      <option value="bsc">BNB Chain</option>
+      <option value="base">Base</option>
+      <option value="arbitrum">Arbitrum</option>
+      <option value="polygon">Polygon</option>
+      <option value="optimism">Optimism</option>
+      <option value="avalanche">Avalanche</option>
+    </select>
+    <button class="go" id="go">Check</button>
+  </div>
+  <div class="hint">Runs in your browser using public data from GoPlus, honeypot.is and DexScreener. Nothing is stored.</div>
+  <div id="out"></div>
+</div>
+
+<section class="copy">
+  <h2>What this honeypot checker does</h2>
+  <p>Before you buy a new token, three things decide whether you can get your money back out: can you actually <strong>sell</strong>, can the developer <strong>change the rules</strong> after you buy, and is the <strong>liquidity</strong> real. This tool checks all three in seconds:</p>
+  <ul>
+    <li><strong>Sell simulation</strong> — an on-chain buy-then-sell is simulated (via honeypot.is on Ethereum, BSC and Base) to catch tokens that let you buy but block or heavily tax the sell.</li>
+    <li><strong>Contract security flags</strong> — GoPlus data reveals mintable supply, proxy contracts, hidden owners, blacklist/whitelist functions, trading cooldowns and ownership that can be reclaimed after being renounced.</li>
+    <li><strong>Holders &amp; liquidity</strong> — holder count, top-holder concentration and DEX liquidity, so a token held by three wallets with $200 of liquidity is obvious at a glance.</li>
+  </ul>
+
+  <h2>How to check if a token is a honeypot</h2>
+  <p>Copy the token's contract address from DexScreener, Etherscan/BscScan, or wherever you found the token. Paste it above and press <em>Check</em>. Leave the network on <em>Auto-detect</em> and it will find the right chain from the token's liquidity pools. Read the verdict: green means no mechanical scam was found, amber means treat with caution, red means the contract has traits that let it trap or drain buyers.</p>
+
+  <h3>A green result is not a buy signal</h3>
+  <p>This tool filters out <em>mechanical</em> scams — honeypots, hidden mints, pullable liquidity. It cannot tell you whether a token has any future, whether the team will abandon it, or whether the price will collapse because nobody cares. Plenty of tokens pass every automated check and still go to zero. Size your position accordingly and never invest more than you can lose.</p>
+
+  <h2>Check tokens from your phone or inside Telegram</h2>
+  <div class="cta">
+    <div>This page covers EVM chains. For <strong>TON jettons</strong>, inline scanning inside any Telegram chat, deep-linked scans, and a hourly feed of fresh liquidity pools, use the bot:</div>
+    <a class="btn" href="https://t.me/RugLens_bot" rel="noopener">Open @RugLens_bot →</a>
+  </div>
+
+  <h2>FAQ</h2>
+  <h3>What is a honeypot token?</h3>
+  <p>A token you can buy but cannot sell. The contract only lets the creator sell, or makes every other sell revert or get taxed at nearly 100%. Your money goes in and cannot come out.</p>
+  <h3>Is this checker free?</h3>
+  <p>Yes — it runs entirely in your browser on public APIs. No account, no wallet connection, no fee.</p>
+  <h3>Which blockchains are supported?</h3>
+  <p>Ethereum, BNB Chain, Base, Arbitrum, Polygon, Optimism and Avalanche here; TON jettons in <a href="https://t.me/RugLens_bot" rel="noopener">the bot</a>. Sell simulation is available on Ethereum, BSC and Base; on other chains you still get full contract, holder and liquidity analysis.</p>
+</section>
+
+<footer>
+  <div>Open source: <a href="https://github.com/mrvlyouknowwho/ruglens" rel="noopener">github.com/mrvlyouknowwho/ruglens</a> · Telegram: <a href="https://t.me/RugLens_bot" rel="noopener">@RugLens_bot</a> · Fresh pools: <a href="https://t.me/FreshPoolsFeed" rel="noopener">@FreshPoolsFeed</a></div>
+  <div class="disc">Not financial advice. Automated screening can miss risks and can flag safe tokens. Always do your own research.</div>
+</footer>
+</div>
+
+<script>
+const GOPLUS_CHAIN = { eth:'1', bsc:'56', base:'8453', arbitrum:'42161', polygon:'137', optimism:'10', avalanche:'43114' };
+const HONEYPOT_CHAIN = { eth:'1', bsc:'56', base:'8453' };
+const DEX_TO_CHAIN = { ethereum:'eth', bsc:'bsc', base:'base', arbitrum:'arbitrum', polygon:'polygon', optimism:'optimism', avalanche:'avalanche' };
+const CHAIN_LABEL = { eth:'Ethereum', bsc:'BNB Chain', base:'Base', arbitrum:'Arbitrum', polygon:'Polygon', optimism:'Optimism', avalanche:'Avalanche' };
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const isEvm = (a) => /^0x[0-9a-fA-F]{40}$/.test(a);
+const isTon = (a) => /^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(a);
+
+async function jget(url){
+  const r = await fetch(url, { signal: AbortSignal.timeout(15000) });
+  if(!r.ok) throw new Error(url.split('/')[2] + ' ' + r.status);
+  return r.json();
+}
+
+async function detectChain(addr){
+  try{
+    const d = await jget('https://api.dexscreener.com/latest/dex/tokens/' + addr);
+    const pairs = (d.pairs || []).filter(p => DEX_TO_CHAIN[p.chainId]);
+    if(!pairs.length) return null;
+    pairs.sort((a,b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
+    return { chain: DEX_TO_CHAIN[pairs[0].chainId], pair: pairs[0] };
+  }catch{ return null; }
+}
+
+async function dexLiquidity(addr){
+  try{
+    const d = await jget('https://api.dexscreener.com/latest/dex/tokens/' + addr);
+    const pairs = (d.pairs || []);
+    if(!pairs.length) return null;
+    pairs.sort((a,b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
+    return pairs[0];
+  }catch{ return null; }
+}
+
+function scoreGoPlus(t){
+  let score = 0; const flags = [];
+  const on = (v) => v === '1' || v === 1 || v === true;
+  if(on(t.is_honeypot)){ score += 100; flags.push(['bad','🚨 Flagged as a honeypot (cannot sell)']); }
+  if(on(t.cannot_sell_all)){ score += 90; flags.push(['bad','⛔ Holders cannot sell their full balance']); }
+  if(on(t.hidden_owner)){ score += 40; flags.push(['bad','🕵️ Hidden owner']); }
+  if(on(t.can_take_back_ownership)){ score += 35; flags.push(['bad','↩️ Renounced ownership can be taken back']); }
+  if(on(t.is_blacklisted)){ score += 30; flags.push(['warn','🚫 Blacklist function present (owner can block sells)']); }
+  if(on(t.selfdestruct)){ score += 40; flags.push(['bad','💣 Contract can self-destruct']); }
+  if(on(t.is_mintable)){ score += 20; flags.push(['warn','🪙 Supply is mintable']); }
+  if(on(t.is_proxy)){ score += 15; flags.push(['warn','🔁 Proxy contract (logic can change)']); }
+  if(on(t.trading_cooldown)){ score += 15; flags.push(['warn','⏳ Trading cooldown enforced']); }
+  if(t.is_open_source === '0'){ score += 20; flags.push(['warn','📕 Contract is not open source']); }
+  const buy = parseFloat(t.buy_tax) * 100, sell = parseFloat(t.sell_tax) * 100;
+  if(sell >= 30){ score += 40; flags.push(['bad', `💸 Very high sell tax: ${sell.toFixed(0)}%`]); }
+  else if(sell >= 10){ score += 15; flags.push(['warn', `💸 High sell tax: ${sell.toFixed(0)}%`]); }
+  return { score, flags, buyTax: buy, sellTax: sell };
+}
+
+function verdict(score){
+  if(score >= 70) return ['b-bad','⛔ HIGH RISK'];
+  if(score >= 25) return ['b-warn','⚠️ CAUTION'];
+  return ['b-ok','✓ NO MECHANICAL SCAM FOUND'];
+}
+
+function render(data){
+  const [cls,label] = verdict(data.score);
+  let flagsHtml = '';
+  if(data.flags.length){
+    flagsHtml = '<ul class="flags">' + data.flags
+      .sort((a,b)=> (a[0]==='bad'?0:1)-(b[0]==='bad'?0:1))
+      .map(f => `<li>${esc(f[1])}</li>`).join('') + '</ul>';
+  } else {
+    flagsHtml = '<ul class="flags"><li>No dangerous contract traits detected.</li></ul>';
+  }
+  const kv = [];
+  if(data.symbol) kv.push(`Token: <b>${esc(data.symbol)}</b>`);
+  kv.push(`Chain: <b>${esc(CHAIN_LABEL[data.chain]||data.chain)}</b>`);
+  if(data.buyTax!=null) kv.push(`Buy tax: <b>${data.buyTax.toFixed(1)}%</b>`);
+  if(data.sellTax!=null) kv.push(`Sell tax: <b>${data.sellTax.toFixed(1)}%</b>`);
+  if(data.holders!=null) kv.push(`Holders: <b>${Number(data.holders).toLocaleString('en-US')}</b>`);
+  if(data.liqUsd!=null) kv.push(`Liquidity: <b>$${Math.round(data.liqUsd).toLocaleString('en-US')}</b>`);
+  if(data.simulated) kv.push(`Sell sim: <b>${data.simulated}</b>`);
+
+  $('out').innerHTML = `
+    <div class="card">
+      <div class="score">
+        <span class="badge ${cls}">${label}</span>
+        <span class="tok">${esc(data.name || data.symbol || 'Token')}</span>
+      </div>
+      <div class="addr">${esc(data.address)}</div>
+      ${flagsHtml}
+      <div class="kv">${kv.join('')}</div>
+    </div>
+    <div class="cta">
+      <div>Want to scan this from your phone, inside a group chat, or check a <strong>TON jetton</strong>? The bot does inline scans and posts fresh pools hourly.</div>
+      <a class="btn" href="https://t.me/RugLens_bot?start=${encodeURIComponent(data.address)}" rel="noopener">Re-scan in @RugLens_bot →</a>
+    </div>
+    <div class="disc">Automated screening only. It can miss risks and can flag safe tokens. Not financial advice.</div>`;
+}
+
+async function run(){
+  const addr = $('addr').value.trim();
+  const out = $('out');
+  if(!addr){ out.innerHTML=''; return; }
+
+  if(isTon(addr)){
+    out.innerHTML = `<div class="card">TON jettons aren’t supported on this page yet.
+      <div class="cta"><div>Scan TON jettons in the bot:</div>
+      <a class="btn" href="https://t.me/RugLens_bot?start=${encodeURIComponent(addr)}" rel="noopener">Open @RugLens_bot →</a></div></div>`;
+    return;
+  }
+  if(!isEvm(addr)){
+    out.innerHTML = `<div class="card">That doesn’t look like a valid contract address. EVM addresses start with <code>0x</code> and are 42 characters long.</div>`;
+    return;
+  }
+
+  $('go').disabled = true;
+  out.innerHTML = `<div class="card"><span class="spin"></span> Scanning on-chain data…</div>`;
+
+  try{
+    let chain = $('chain').value;
+    let detectedPair = null;
+    if(chain === 'auto'){
+      const det = await detectChain(addr);
+      if(det){ chain = det.chain; detectedPair = det.pair; }
+      else {
+        out.innerHTML = `<div class="card">No DEX liquidity found for this address, so the chain can’t be auto-detected. Pick the network manually and try again.</div>`;
+        $('go').disabled = false; return;
+      }
+    }
+
+    const goplusId = GOPLUS_CHAIN[chain];
+    const [gpRes, hpRes, dexRes] = await Promise.allSettled([
+      jget(`https://api.gopluslabs.io/api/v1/token_security/${goplusId}?contract_addresses=${addr}`),
+      HONEYPOT_CHAIN[chain] ? jget(`https://api.honeypot.is/v2/IsHoneypot?address=${addr}&chainID=${HONEYPOT_CHAIN[chain]}`) : Promise.reject('n/a'),
+      detectedPair ? Promise.resolve({pairs:[detectedPair]}) : dexLiquidity(addr).then(p=>({pairs:p?[p]:[]}))
+    ]);
+
+    const data = { address: addr, chain, score: 0, flags: [], buyTax:null, sellTax:null, holders:null, liqUsd:null, symbol:null, name:null, simulated:null };
+
+    if(gpRes.status === 'fulfilled'){
+      const r = gpRes.value.result || {};
+      const t = r[addr.toLowerCase()] || Object.values(r)[0];
+      if(t){
+        const s = scoreGoPlus(t);
+        data.score += s.score; data.flags.push(...s.flags);
+        data.buyTax = s.buyTax; data.sellTax = s.sellTax;
+        data.holders = t.holder_count != null ? t.holder_count : null;
+        data.symbol = t.token_symbol || null; data.name = t.token_name || null;
+      }
+    }
+
+    if(hpRes.status === 'fulfilled'){
+      const h = hpRes.value;
+      const isHp = h.honeypotResult?.isHoneypot;
+      data.simulated = isHp ? 'HONEYPOT' : 'sell OK';
+      if(isHp){ data.score += 100; data.flags.push(['bad','🚨 Live sell simulation failed — this is a honeypot']); }
+      if(h.simulationResult){
+        if(data.buyTax==null && h.simulationResult.buyTax!=null) data.buyTax = h.simulationResult.buyTax;
+        if(data.sellTax==null && h.simulationResult.sellTax!=null) data.sellTax = h.simulationResult.sellTax;
+      }
+      if(!data.symbol && h.token?.symbol) data.symbol = h.token.symbol;
+    }
+
+    if(dexRes.status === 'fulfilled'){
+      const p = dexRes.value.pairs?.[0];
+      if(p){
+        data.liqUsd = p.liquidity?.usd ?? null;
+        if(!data.symbol && p.baseToken?.symbol) data.symbol = p.baseToken.symbol;
+        if(!data.name && p.baseToken?.name) data.name = p.baseToken.name;
+        if(data.liqUsd != null && data.liqUsd < 5000){ data.score += 15; data.flags.push(['warn', `💧 Very low liquidity: $${Math.round(data.liqUsd).toLocaleString('en-US')}`]); }
+      } else {
+        data.flags.push(['warn','💧 No DEX liquidity found']);
+        data.score += 20;
+      }
+    }
+
+    data.score = Math.min(100, data.score);
+    render(data);
+  }catch(e){
+    out.innerHTML = `<div class="card">Couldn’t complete the scan (${esc(e.message||e)}). Try again in a moment, or use <a href="https://t.me/RugLens_bot" rel="noopener">@RugLens_bot</a>.</div>`;
+  }finally{
+    $('go').disabled = false;
+  }
+}
+
+$('go').addEventListener('click', run);
+$('addr').addEventListener('keydown', (e)=>{ if(e.key==='Enter') run(); });
+// deep-link: ?a=0x…
+const qa = new URLSearchParams(location.search).get('a');
+if(qa){ $('addr').value = qa; run(); }
+</script>
+</body>
+</html>
