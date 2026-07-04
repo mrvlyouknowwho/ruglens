@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Tax Checker — See Buy and Sell Tax Before You Trade | RugLens</title>
+<meta name="description" content="Free token tax checker. Paste a contract address to see the real buy and sell tax from a live on-chain simulation before you trade. Catches hidden exit taxes. No sign-up.">
+<link rel="canonical" href="https://mrvlyouknowwho.github.io/ruglens/token-tax-checker.html">
+<meta property="og:title" content="Token Tax Checker — See Buy and Sell Tax Before You Trade | RugLens">
+<meta property="og:description" content="Free token tax checker. Paste a contract address to see the real buy and sell tax from a live on-chain simulation before you trade. Catches hidden exit taxes. No sign-up.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://mrvlyouknowwho.github.io/ruglens/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://mrvlyouknowwho.github.io/ruglens/og.png">
+<link rel="stylesheet" href="/ruglens/styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I check a token's real buy and sell tax?", "acceptedAnswer": {"@type": "Answer", "text": "Paste the contract address above. The tool runs a live on-chain buy-then-sell simulation on Ethereum, BSC or Base and reports the actual tax each direction cost, rather than the number the project advertises."}}, {"@type": "Question", "name": "Why is the sell tax higher than the buy tax?", "acceptedAnswer": {"@type": "Answer", "text": "A high sell tax relative to the buy tax is how many scam tokens trap money: buying looks cheap, but exiting is punished. A large asymmetry is a strong warning sign."}}, {"@type": "Question", "name": "Can the tax change after I buy?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. If the contract is mintable, upgradeable via a proxy, or has an active owner, the tax and trading rules can be changed after you are in. The tool flags those powers alongside the current tax."}}]}</script>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Token Tax Checker</h1>
+  <p class="sub">See the real buy and sell tax before you trade — measured from a live on-chain simulation, not the number in the token's bio.</p>
+</header>
+<nav class="pill-nav">
+  <a href="/ruglens/">All chains</a>
+  <a href="/ruglens/ethereum-honeypot-checker.html">Ethereum</a>
+  <a href="/ruglens/bsc-honeypot-checker.html">BSC</a>
+  <a href="/ruglens/base-token-scam-checker.html">Base</a>
+  <a href="/ruglens/token-tax-checker.html">Buy/sell tax</a>
+  <a href="/ruglens/can-i-sell-this-token.html">Can I sell?</a>
+  <a href="/ruglens/check-token-before-buying.html">Before buying</a>
+</nav>
+<div class="tool">
+  <div class="row">
+    <input id="addr" type="text" placeholder="0x… (EVM token contract address)" autocomplete="off" spellcheck="false">
+    <select id="chain"><option value="auto" selected>Auto-detect</option><option value="eth">Ethereum</option><option value="bsc">BNB Chain</option><option value="base">Base</option><option value="arbitrum">Arbitrum</option><option value="polygon">Polygon</option><option value="optimism">Optimism</option><option value="avalanche">Avalanche</option></select>
+    <button class="go" id="go">Check</button>
+  </div>
+  <div class="hint">Runs in your browser using public data from GoPlus, honeypot.is and DexScreener. Nothing is stored.</div>
+  <div id="out"></div>
+</div>
+<section class="copy">
+<h2>The tax in the chat is not the tax you pay</h2>
+<p>Plenty of tokens advertise "5% tax" and then charge you 40% — or 99% — the moment you try to sell. The only number that matters is the one measured on-chain, and that is what this tool reports: it runs a real buy and a real sell against the contract and tells you what each one actually cost.</p>
+<h2>What you get</h2>
+<ul>
+  <li><strong>Real buy tax and sell tax</strong> from a live simulation on Ethereum, BSC or Base.</li>
+  <li><strong>Asymmetry flag</strong> — a sell tax far higher than the buy tax is the classic slow-drain and honeypot pattern.</li>
+  <li><strong>Context</strong> — mintable supply, owner powers, holders and liquidity, so a "high tax" reading is never seen in isolation.</li>
+</ul>
+<p>Paste the contract above, leave the network on <em>Auto-detect</em>, and press Check. A sell tax at or above 30% is treated as high risk; a reverting sell is flagged as an outright honeypot.</p>
+<div class="cta">
+    <div>Want tax and honeypot checks from your phone or inside a group chat? The bot does inline scans and covers TON jettons too.</div>
+    <a class="btn" href="https://t.me/RugLens_bot" rel="noopener">Open @RugLens_bot →</a>
+  </div>
+<h2>FAQ</h2>
+<h3>How do I check a token&#x27;s real buy and sell tax?</h3><p>Paste the contract address above. The tool runs a live on-chain buy-then-sell simulation on Ethereum, BSC or Base and reports the actual tax each direction cost, rather than the number the project advertises.</p><h3>Why is the sell tax higher than the buy tax?</h3><p>A high sell tax relative to the buy tax is how many scam tokens trap money: buying looks cheap, but exiting is punished. A large asymmetry is a strong warning sign.</p><h3>Can the tax change after I buy?</h3><p>Yes. If the contract is mintable, upgradeable via a proxy, or has an active owner, the tax and trading rules can be changed after you are in. The tool flags those powers alongside the current tax.</p>
+</section>
+<footer>
+  <div>Open source: <a href="https://github.com/mrvlyouknowwho/ruglens" rel="noopener">github.com/mrvlyouknowwho/ruglens</a> · Telegram: <a href="https://t.me/RugLens_bot" rel="noopener">@RugLens_bot</a> · Fresh pools: <a href="https://t.me/FreshPoolsFeed" rel="noopener">@FreshPoolsFeed</a></div>
+  <div class="disc">Not financial advice. Automated screening can miss risks and can flag safe tokens. Always do your own research.</div>
+</footer>
+</div>
+<script src="/ruglens/checker.js"></script>
+</body>
+</html>

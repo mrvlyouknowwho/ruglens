@@ -24,10 +24,14 @@ async function detectChain(addr){
   }catch{ return null; }
 }
 
-async function dexLiquidity(addr){
+async function dexLiquidity(addr, chain){
   try{
     const d = await jget('https://api.dexscreener.com/latest/dex/tokens/' + addr);
-    const pairs = (d.pairs || []);
+    let pairs = (d.pairs || []);
+    if(chain){
+      const onChain = pairs.filter(p => DEX_TO_CHAIN[p.chainId] === chain);
+      if(onChain.length) pairs = onChain;
+    }
     if(!pairs.length) return null;
     pairs.sort((a,b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
     return pairs[0];
@@ -130,7 +134,7 @@ async function run(){
     const [gpRes, hpRes, dexRes] = await Promise.allSettled([
       jget(`https://api.gopluslabs.io/api/v1/token_security/${goplusId}?contract_addresses=${addr}`),
       HONEYPOT_CHAIN[chain] ? jget(`https://api.honeypot.is/v2/IsHoneypot?address=${addr}&chainID=${HONEYPOT_CHAIN[chain]}`) : Promise.reject('n/a'),
-      detectedPair ? Promise.resolve({pairs:[detectedPair]}) : dexLiquidity(addr).then(p=>({pairs:p?[p]:[]}))
+      detectedPair ? Promise.resolve({pairs:[detectedPair]}) : dexLiquidity(addr, chain).then(p=>({pairs:p?[p]:[]}))
     ]);
 
     const data = { address: addr, chain, score: 0, flags: [], buyTax:null, sellTax:null, holders:null, liqUsd:null, symbol:null, name:null, simulated:null };
