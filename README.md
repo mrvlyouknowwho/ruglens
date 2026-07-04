@@ -4,6 +4,8 @@
 
 Works with **Ethereum, BSC, Base, Arbitrum, Polygon, Optimism, Avalanche and TON jettons**.
 
+**No Telegram? Use the web checker → [mrvlyouknowwho.github.io/ruglens](https://mrvlyouknowwho.github.io/ruglens/)** — same EVM checks, runs entirely in your browser, nothing stored.
+
 ## What it checks
 
 - **Honeypot**: static contract analysis plus a live buy/sell simulation (ETH/BSC/Base) — can you actually sell after you buy?
