@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://mrvlyouknowwho.github.io/ruglens/sitemap.xml

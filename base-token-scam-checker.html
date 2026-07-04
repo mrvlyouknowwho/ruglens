@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base Token Scam Checker — Screen Base Chain Tokens | RugLens</title>
+<meta name="description" content="Free scam checker for Base chain tokens. Paste a contract address for a live sell simulation and full contract, holder and liquidity analysis. No sign-up.">
+<link rel="canonical" href="https://mrvlyouknowwho.github.io/ruglens/base-token-scam-checker.html">
+<meta property="og:title" content="Base Token Scam Checker — Screen Base Chain Tokens | RugLens">
+<meta property="og:description" content="Free scam checker for Base chain tokens. Paste a contract address for a live sell simulation and full contract, holder and liquidity analysis. No sign-up.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/ruglens/styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I check if a Base token is a scam?", "acceptedAnswer": {"@type": "Answer", "text": "Paste the Base contract address above with the network set to Base. The tool simulates a sell and analyses the contract, holders and liquidity to flag honeypots and rug risks."}}, {"@type": "Question", "name": "Does the sell simulation work on Base?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Live buy/sell simulation is available on Ethereum, BSC and Base, so Base tokens get the full honeypot check."}}, {"@type": "Question", "name": "Is it free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, it runs entirely in your browser with no sign-up."}}]}</script>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Base Token Scam Checker</h1>
+  <p class="sub">Screen any Base chain token before you ape. Sell simulation, taxes, contract flags, holders and liquidity — free, in your browser.</p>
+</header>
+<nav class="pill-nav">
+  <a href="/ruglens/">All chains</a>
+  <a href="/ruglens/bsc-honeypot-checker.html">BSC</a>
+  <a href="/ruglens/base-token-scam-checker.html">Base</a>
+  <a href="/ruglens/can-i-sell-this-token.html">Can I sell?</a>
+</nav>
+<div class="tool">
+  <div class="row">
+    <input id="addr" type="text" placeholder="0x… (EVM token contract address)" autocomplete="off" spellcheck="false">
+    <select id="chain"><option value="auto">Auto-detect</option><option value="eth">Ethereum</option><option value="bsc">BNB Chain</option><option value="base" selected>Base</option><option value="arbitrum">Arbitrum</option><option value="polygon">Polygon</option><option value="optimism">Optimism</option><option value="avalanche">Avalanche</option></select>
+    <button class="go" id="go">Check</button>
+  </div>
+  <div class="hint">Runs in your browser using public data from GoPlus, honeypot.is and DexScreener. Nothing is stored.</div>
+  <div id="out"></div>
+</div>
+<section class="copy">
+<h2>Base moves fast — screen before you ape</h2>
+<p>Base's low fees and Coinbase pipeline made it a hotspot for fresh launches, which means fresh scams alongside the real projects. A token trending in a feed can be a honeypot minted twenty minutes ago. Screening takes a few seconds and is the cheapest insurance you will ever buy.</p>
+<h2>What gets checked on Base</h2>
+<ul>
+  <li><strong>Live sell simulation</strong> via honeypot.is on Base — confirms you can actually sell.</li>
+  <li><strong>Taxes and owner powers</strong> — sell tax, mintable supply, proxy upgradeability, reclaimable ownership.</li>
+  <li><strong>Holders and liquidity</strong> — concentration in the top wallets and Aerodrome/Uniswap pool depth.</li>
+</ul>
+<p>Set the network to <strong>Base</strong> above, paste the token contract, and press Check.</p>
+<div class="cta">
+    <div>Following fresh Base launches? The bot posts an hourly feed of new liquidity pools with one-tap scan links.</div>
+    <a class="btn" href="https://t.me/RugLens_bot" rel="noopener">Open @RugLens_bot →</a>
+  </div>
+<h2>FAQ</h2>
+<h3>How do I check if a Base token is a scam?</h3><p>Paste the Base contract address above with the network set to Base. The tool simulates a sell and analyses the contract, holders and liquidity to flag honeypots and rug risks.</p><h3>Does the sell simulation work on Base?</h3><p>Yes. Live buy/sell simulation is available on Ethereum, BSC and Base, so Base tokens get the full honeypot check.</p><h3>Is it free?</h3><p>Yes, it runs entirely in your browser with no sign-up.</p>
+</section>
+<footer>
+  <div>Open source: <a href="https://github.com/mrvlyouknowwho/ruglens" rel="noopener">github.com/mrvlyouknowwho/ruglens</a> · Telegram: <a href="https://t.me/RugLens_bot" rel="noopener">@RugLens_bot</a> · Fresh pools: <a href="https://t.me/FreshPoolsFeed" rel="noopener">@FreshPoolsFeed</a></div>
+  <div class="disc">Not financial advice. Automated screening can miss risks and can flag safe tokens. Always do your own research.</div>
+</footer>
+</div>
+<script src="/ruglens/checker.js"></script>
+</body>
+</html>

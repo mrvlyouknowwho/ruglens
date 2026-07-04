@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Can I Sell This Token? — Instant Honeypot Sell Check | RugLens</title>
+<meta name="description" content="Find out if you can sell a token before you buy it. Free live sell simulation for EVM tokens — catches honeypots that let you buy but block the sell. No sign-up.">
+<link rel="canonical" href="https://mrvlyouknowwho.github.io/ruglens/can-i-sell-this-token.html">
+<meta property="og:title" content="Can I Sell This Token? — Instant Honeypot Sell Check | RugLens">
+<meta property="og:description" content="Find out if you can sell a token before you buy it. Free live sell simulation for EVM tokens — catches honeypots that let you buy but block the sell. No sign-up.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/ruglens/styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How can I tell if I'll be able to sell a token?", "acceptedAnswer": {"@type": "Answer", "text": "Run a live sell simulation before buying. Paste the contract address above; the tool simulates a buy and a sell on-chain and reports whether the sell succeeds."}}, {"@type": "Question", "name": "What is a honeypot?", "acceptedAnswer": {"@type": "Answer", "text": "A token you can buy but cannot sell. Buys work so the token looks legitimate, but the contract blocks or heavily taxes every sell except the creator's."}}, {"@type": "Question", "name": "Which chains support the sell simulation?", "acceptedAnswer": {"@type": "Answer", "text": "Ethereum, BSC and Base have live sell simulation. Other EVM chains use contract-level analysis to estimate sellability."}}]}</script>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Can I Sell This Token?</h1>
+  <p class="sub">The question that matters most before buying. Run a live sell simulation and find out in seconds — free, in your browser.</p>
+</header>
+<nav class="pill-nav">
+  <a href="/ruglens/">All chains</a>
+  <a href="/ruglens/bsc-honeypot-checker.html">BSC</a>
+  <a href="/ruglens/base-token-scam-checker.html">Base</a>
+  <a href="/ruglens/can-i-sell-this-token.html">Can I sell?</a>
+</nav>
+<div class="tool">
+  <div class="row">
+    <input id="addr" type="text" placeholder="0x… (EVM token contract address)" autocomplete="off" spellcheck="false">
+    <select id="chain"><option value="auto" selected>Auto-detect</option><option value="eth">Ethereum</option><option value="bsc">BNB Chain</option><option value="base">Base</option><option value="arbitrum">Arbitrum</option><option value="polygon">Polygon</option><option value="optimism">Optimism</option><option value="avalanche">Avalanche</option></select>
+    <button class="go" id="go">Check</button>
+  </div>
+  <div class="hint">Runs in your browser using public data from GoPlus, honeypot.is and DexScreener. Nothing is stored.</div>
+  <div id="out"></div>
+</div>
+<section class="copy">
+<h2>"I can buy it, but can I sell it?"</h2>
+<p>That is the entire honeypot trick: buying works perfectly, so the token looks fine, and the sell is what fails. By the time you find out, your money is stuck. The only reliable way to know in advance is to <strong>simulate a sell</strong> on-chain before you spend a cent.</p>
+<h2>How the sell check works</h2>
+<p>Paste the contract address above. The tool asks honeypot.is to run a real buy-then-sell against the token on Ethereum, BSC or Base and reports whether the sell succeeds and at what tax. On other EVM chains it falls back to contract-level analysis (blacklist functions, cannot-sell-all flags, ownership powers) to estimate the same risk.</p>
+<h3>What "sell OK" and "HONEYPOT" mean</h3>
+<p><strong>sell OK</strong> means the simulated sell went through — you can most likely exit, minus any tax shown. <strong>HONEYPOT</strong> means the simulated sell failed: treat the token as a trap and stay out.</p>
+<div class="cta">
+    <div>Check tokens from your phone or inside a group chat — and scan TON jettons too — with the bot.</div>
+    <a class="btn" href="https://t.me/RugLens_bot" rel="noopener">Open @RugLens_bot →</a>
+  </div>
+<h2>FAQ</h2>
+<h3>How can I tell if I&#x27;ll be able to sell a token?</h3><p>Run a live sell simulation before buying. Paste the contract address above; the tool simulates a buy and a sell on-chain and reports whether the sell succeeds.</p><h3>What is a honeypot?</h3><p>A token you can buy but cannot sell. Buys work so the token looks legitimate, but the contract blocks or heavily taxes every sell except the creator's.</p><h3>Which chains support the sell simulation?</h3><p>Ethereum, BSC and Base have live sell simulation. Other EVM chains use contract-level analysis to estimate sellability.</p>
+</section>
+<footer>
+  <div>Open source: <a href="https://github.com/mrvlyouknowwho/ruglens" rel="noopener">github.com/mrvlyouknowwho/ruglens</a> · Telegram: <a href="https://t.me/RugLens_bot" rel="noopener">@RugLens_bot</a> · Fresh pools: <a href="https://t.me/FreshPoolsFeed" rel="noopener">@FreshPoolsFeed</a></div>
+  <div class="disc">Not financial advice. Automated screening can miss risks and can flag safe tokens. Always do your own research.</div>
+</footer>
+</div>
+<script src="/ruglens/checker.js"></script>
+</body>
+</html>

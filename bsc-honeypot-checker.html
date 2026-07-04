@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BSC Honeypot Checker — Check BNB Chain Tokens for Scams | RugLens</title>
+<meta name="description" content="Free BSC honeypot checker. Paste a BNB Chain token contract and run a live sell simulation plus contract, holder and liquidity analysis. No sign-up.">
+<link rel="canonical" href="https://mrvlyouknowwho.github.io/ruglens/bsc-honeypot-checker.html">
+<meta property="og:title" content="BSC Honeypot Checker — Check BNB Chain Tokens for Scams | RugLens">
+<meta property="og:description" content="Free BSC honeypot checker. Paste a BNB Chain token contract and run a live sell simulation plus contract, holder and liquidity analysis. No sign-up.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/ruglens/styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I check a BSC token for a honeypot?", "acceptedAnswer": {"@type": "Answer", "text": "Paste the BNB Chain contract address above with the network set to BNB Chain. The tool runs a live sell simulation and reads contract, holder and liquidity data to flag honeypots and rug risks."}}, {"@type": "Question", "name": "Why are there so many honeypots on BNB Chain?", "acceptedAnswer": {"@type": "Answer", "text": "Deployment is cheap and fast, so scammers mass-produce tokens that let you buy but block the sell. Always simulate a sell before buying a new BSC token."}}, {"@type": "Question", "name": "Is the BSC checker free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, it runs in your browser on public APIs with no account or wallet connection."}}]}</script>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>BSC Honeypot Checker</h1>
+  <p class="sub">Check any BNB Chain token before you buy. Live sell simulation, taxes, owner powers, holders and liquidity — in seconds, in your browser.</p>
+</header>
+<nav class="pill-nav">
+  <a href="/ruglens/">All chains</a>
+  <a href="/ruglens/bsc-honeypot-checker.html">BSC</a>
+  <a href="/ruglens/base-token-scam-checker.html">Base</a>
+  <a href="/ruglens/can-i-sell-this-token.html">Can I sell?</a>
+</nav>
+<div class="tool">
+  <div class="row">
+    <input id="addr" type="text" placeholder="0x… (EVM token contract address)" autocomplete="off" spellcheck="false">
+    <select id="chain"><option value="auto">Auto-detect</option><option value="eth">Ethereum</option><option value="bsc" selected>BNB Chain</option><option value="base">Base</option><option value="arbitrum">Arbitrum</option><option value="polygon">Polygon</option><option value="optimism">Optimism</option><option value="avalanche">Avalanche</option></select>
+    <button class="go" id="go">Check</button>
+  </div>
+  <div class="hint">Runs in your browser using public data from GoPlus, honeypot.is and DexScreener. Nothing is stored.</div>
+  <div id="out"></div>
+</div>
+<section class="copy">
+<h2>Why BNB Chain has so many honeypots</h2>
+<p>Cheap deployment and fast blocks made BNB Chain the busiest playground for token scams. A new honeypot can be deployed for a couple of dollars, shilled in a group, and abandoned once enough buyers are trapped. The good news: because BSC contracts are simple and their sells are cheap to simulate, they are also the easiest to screen.</p>
+<h2>What gets checked on BSC</h2>
+<ul>
+  <li><strong>Live sell simulation</strong> via honeypot.is — a real buy-then-sell on BNB Chain, so a "buys work, sells revert" trap is caught immediately.</li>
+  <li><strong>Buy and sell tax</strong> — BSC scam tokens love a 99% sell tax that looks like 5% until you try to exit.</li>
+  <li><strong>Owner powers</strong> — pausable trading, blacklist functions, mintable supply, hidden owners.</li>
+  <li><strong>Liquidity</strong> — PancakeSwap pool size and whether it looks pullable.</li>
+</ul>
+<p>Leave the network set to <strong>BNB Chain</strong> above, paste the contract, and press Check.</p>
+<div class="cta">
+    <div>Trade on your phone? Scan BSC tokens inline in any Telegram chat, and get TON jetton support too, in the bot.</div>
+    <a class="btn" href="https://t.me/RugLens_bot" rel="noopener">Open @RugLens_bot →</a>
+  </div>
+<h2>FAQ</h2>
+<h3>How do I check a BSC token for a honeypot?</h3><p>Paste the BNB Chain contract address above with the network set to BNB Chain. The tool runs a live sell simulation and reads contract, holder and liquidity data to flag honeypots and rug risks.</p><h3>Why are there so many honeypots on BNB Chain?</h3><p>Deployment is cheap and fast, so scammers mass-produce tokens that let you buy but block the sell. Always simulate a sell before buying a new BSC token.</p><h3>Is the BSC checker free?</h3><p>Yes, it runs in your browser on public APIs with no account or wallet connection.</p>
+</section>
+<footer>
+  <div>Open source: <a href="https://github.com/mrvlyouknowwho/ruglens" rel="noopener">github.com/mrvlyouknowwho/ruglens</a> · Telegram: <a href="https://t.me/RugLens_bot" rel="noopener">@RugLens_bot</a> · Fresh pools: <a href="https://t.me/FreshPoolsFeed" rel="noopener">@FreshPoolsFeed</a></div>
+  <div class="disc">Not financial advice. Automated screening can miss risks and can flag safe tokens. Always do your own research.</div>
+</footer>
+</div>
+<script src="/ruglens/checker.js"></script>
+</body>
+</html>
