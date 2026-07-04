@@ -1,8 +1,9 @@
 import { Bot, InlineKeyboard, GrammyError } from 'grammy';
 import { assessEvm } from './evm-analyzer.mjs';
 import { assessTon } from './ton-analyzer.mjs';
+import { assessSol } from './sol-analyzer.mjs';
 import { detectAddress, resolveEvmChains } from './resolve.mjs';
-import { pickLang, formatEvmReport, formatTonReport } from './report.mjs';
+import { pickLang, formatEvmReport, formatTonReport, formatSolReport } from './report.mjs';
 import { consumeCheck, refundCheck, addCredits, getUser, freeLimit, recordPurchase, stats } from './store.mjs';
 
 if (!process.env.BOT_TOKEN) {
@@ -30,10 +31,10 @@ const MSG = {
   en: {
     start: (limit) =>
       `Send me a token contract address — I return an instant rug/honeypot risk report.\n\n` +
-      `Supported: Ethereum, BSC, Base, Arbitrum, Polygon, Optimism, Avalanche + TON jettons.\n\n` +
+      `Supported: Ethereum, BSC, Base, Arbitrum, Polygon, Optimism, Avalanche, Solana + TON jettons.\n\n` +
       `Free: ${limit} checks/day. /buy for more. /help for details.` + PROMO.en,
     help: (limit) =>
-      `Paste a contract address (0x… for EVM chains, EQ…/UQ… for TON jettons).\n\n` +
+      `Paste a contract address (0x… for EVM chains, base58 for Solana, EQ…/UQ… for TON jettons).\n\n` +
       `I check: honeypot (static + live buy/sell simulation where available), taxes, ` +
       `owner powers, mint, blacklist, proxy, holder concentration, DEX liquidity.\n\n` +
       `Free: ${limit} checks/day, then paid packs (/buy). /balance shows what you have left.\n` +
@@ -45,19 +46,19 @@ const MSG = {
     limit_hit: 'Daily free limit reached. Buy a pack to continue:',
     choose_chain: 'Token not found on DEXes. Which chain is it on?',
     not_found: (chain) => `Token not found on ${chain}. Check the address and chain.`,
-    sol: 'Solana is not supported yet — EVM chains and TON only.',
     limit_btn: 'Limit reached — buy a pack',
     error: 'Could not analyze this token right now. Try again in a minute.',
     paysupport: 'Payment problems? Describe the issue in a message starting with /paysupport and it will be reviewed. Refunds are honored for undelivered credits.',
     scanning: '🔎 Scanning…',
+    rescan: '🔄 Rescan',
   },
   ru: {
     start: (limit) =>
       `Пришли мне адрес контракта токена — верну мгновенный отчёт о рисках (rug/honeypot).\n\n` +
-      `Поддержка: Ethereum, BSC, Base, Arbitrum, Polygon, Optimism, Avalanche + TON-джеттоны.\n\n` +
+      `Поддержка: Ethereum, BSC, Base, Arbitrum, Polygon, Optimism, Avalanche, Solana + TON-джеттоны.\n\n` +
       `Бесплатно: ${limit} проверок в день. /buy — купить ещё. /help — подробности.` + PROMO.ru,
     help: (limit) =>
-      `Вставь адрес контракта (0x… для EVM-сетей, EQ…/UQ… для TON-джеттонов).\n\n` +
+      `Вставь адрес контракта (0x… для EVM-сетей, base58 для Solana, EQ…/UQ… для TON-джеттонов).\n\n` +
       `Проверяю: honeypot (статика + живая симуляция покупки/продажи где доступна), налоги, ` +
       `права владельца, минт, чёрные списки, proxy, концентрацию держателей, ликвидность на DEX.\n\n` +
       `Бесплатно: ${limit} проверок в день, дальше пакеты (/buy). /balance — остаток.\n` +
@@ -69,11 +70,11 @@ const MSG = {
     limit_hit: 'Дневной бесплатный лимит исчерпан. Пакет, чтобы продолжить:',
     choose_chain: 'Токен не найден на DEX. На какой он сети?',
     not_found: (chain) => `Токен не найден на ${chain}. Проверь адрес и сеть.`,
-    sol: 'Solana пока не поддерживается — только EVM-сети и TON.',
     limit_btn: 'Лимит исчерпан — купить пакет',
     error: 'Не получилось проанализировать токен. Попробуй через минуту.',
     paysupport: 'Проблема с оплатой? Опиши её сообщением, начинающимся с /paysupport — оно будет рассмотрено. Кредиты, не выданные после оплаты, возмещаются.',
     scanning: '🔎 Сканирую…',
+    rescan: '🔄 Пересканировать',
   },
 };
 
@@ -114,16 +115,29 @@ async function sendReport(ctx, kind, address, chain) {
   }
   const note = await ctx.reply(m.scanning);
   try {
-    const text = kind === 'ton'
-      ? formatTonReport(await assessTon(address), lang(ctx), BOT_USERNAME)
-      : formatEvmReport(await assessEvm(chain, address), lang(ctx), BOT_USERNAME);
-    await ctx.api.editMessageText(note.chat.id, note.message_id, text, {
+    let r, text;
+    if (kind === 'ton') {
+      r = await assessTon(address);
+      text = formatTonReport(r, lang(ctx), BOT_USERNAME);
+    } else if (kind === 'sol') {
+      r = await assessSol(address);
+      text = formatSolReport(r, lang(ctx), BOT_USERNAME);
+    } else {
+      r = await assessEvm(chain, address);
+      text = formatEvmReport(r, lang(ctx), BOT_USERNAME);
+    }
+    const opts = {
       parse_mode: 'HTML',
       link_preview_options: { is_disabled: true },
-    });
+    };
+    if (r.dataSparse) {
+      const cb = kind === 'sol' ? `s|${address}` : `c|${chain}|${address}`;
+      opts.reply_markup = new InlineKeyboard().text(m.rescan, cb);
+    }
+    await ctx.api.editMessageText(note.chat.id, note.message_id, text, opts);
   } catch (e) {
     refundCheck(ctx.from.id, quota.source);
-    const failText = /not found/i.test(e.message) ? m.not_found(chain || 'TON') : m.error;
+    const failText = /not found/i.test(e.message) ? m.not_found(chain || (kind === 'sol' ? 'Solana' : 'TON')) : m.error;
     await ctx.api.editMessageText(note.chat.id, note.message_id, failText).catch(() => {});
     console.error(`scan failed kind=${kind} chain=${chain} addr=${address}: ${e.message}`);
   }
@@ -132,8 +146,9 @@ async function sendReport(ctx, kind, address, chain) {
 bot.command('start', async (ctx) => {
   if (ctx.match === 'buy') return ctx.reply(msg(ctx).buy, { reply_markup: buyKeyboard(ctx) });
   const hit = detectAddress(ctx.match || '');
-  if (hit && hit.kind !== 'sol' && !throttled(ctx.from.id)) {
+  if (hit && !throttled(ctx.from.id)) {
     if (hit.kind === 'ton') return sendReport(ctx, 'ton', hit.address);
+    if (hit.kind === 'sol') return sendReport(ctx, 'sol', hit.address);
     let chains = [];
     try { chains = await resolveEvmChains(hit.address); } catch {}
     if (chains.length) return sendReport(ctx, 'evm', hit.address, chains[0].chain);
@@ -161,6 +176,11 @@ bot.callbackQuery(/^buy\|(p\d+)$/, async (ctx) => {
 bot.callbackQuery(/^c\|([a-z]+)\|(0x[0-9a-fA-F]{40})$/, async (ctx) => {
   await ctx.answerCallbackQuery();
   await sendReport(ctx, 'evm', ctx.match[2], ctx.match[1]);
+});
+
+bot.callbackQuery(/^s\|([1-9A-HJ-NP-Za-km-z]{32,44})$/, async (ctx) => {
+  await ctx.answerCallbackQuery();
+  await sendReport(ctx, 'sol', ctx.match[1]);
 });
 
 bot.on('pre_checkout_query', (ctx) => ctx.answerPreCheckoutQuery(true));
@@ -197,7 +217,7 @@ bot.on('message:text', async (ctx) => {
   const m = msg(ctx);
 
   if (hit.kind === 'sol') {
-    await ctx.reply(m.sol);
+    await sendReport(ctx, 'sol', hit.address);
     return;
   }
   if (hit.kind === 'ton') {
@@ -227,7 +247,7 @@ bot.on('message:text', async (ctx) => {
 // Inline mode: @bot <address> in any chat; result message carries "via @bot".
 bot.on('inline_query', async (ctx) => {
   const hit = detectAddress(ctx.inlineQuery.query);
-  if (!hit || hit.kind === 'sol') {
+  if (!hit) {
     await ctx.answerInlineQuery([], { cache_time: 10 }).catch(() => {});
     return;
   }
@@ -245,6 +265,12 @@ bot.on('inline_query', async (ctx) => {
       const r = await assessTon(hit.address);
       text = formatTonReport(r, lang(ctx), BOT_USERNAME);
       title = `${r.symbol || 'TON jetton'} · risk ${r.score}/100`;
+    } else if (hit.kind === 'sol') {
+      const r = await assessSol(hit.address);
+      text = formatSolReport(r, lang(ctx), BOT_USERNAME);
+      title = r.dataSparse
+        ? `${hit.address.slice(0, 10)}… · solana · too new`
+        : `${r.symbol ? '$' + r.symbol : hit.address.slice(0, 10)} · solana · risk ${r.score}/100`;
     } else {
       const chains = await resolveEvmChains(hit.address);
       const chain = chains[0]?.chain || 'ethereum';

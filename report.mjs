@@ -25,6 +25,10 @@ const FLAG_TEXT = {
     few_holders: '👥 Very few holders (<25)',
     dex_blacklisted: '🚫 Blacklisted on STON.fi',
     taxable_transfer: '💸 Transfer tax detected',
+    freeze_authority: '🥶 Freeze authority active — accounts can be frozen',
+    closable_accounts: '💣 Token accounts can be closed by authority',
+    non_transferable: '⛔ Token is non-transferable',
+    transfer_hook: '🪝 Transfer hook program attached',
   },
   ru: {
     static_honeypot: '🚨 Флаг honeypot (статический анализ)',
@@ -50,6 +54,10 @@ const FLAG_TEXT = {
     few_holders: '👥 Очень мало держателей (<25)',
     dex_blacklisted: '🚫 В чёрном списке STON.fi',
     taxable_transfer: '💸 Обнаружен налог на перевод',
+    freeze_authority: '🥶 Freeze authority активна — аккаунты можно заморозить',
+    closable_accounts: '💣 Токен-аккаунты может закрыть authority',
+    non_transferable: '⛔ Токен нельзя переводить',
+    transfer_hook: '🪝 К переводам прикреплена hook-программа',
   },
 };
 
@@ -76,10 +84,17 @@ const T = {
     admin: 'admin set',
     sim_basis: 'Verified with live buy/sell simulation',
     static_basis: 'Static analysis only (no simulation on this chain)',
+    sim_failed_basis: 'Static analysis only (simulation not available for this token yet)',
     disclaimer: 'Automated heuristics, not financial advice. DYOR.',
     yes: 'yes',
     no: 'no',
     unknown: '?',
+    verdict_new: '⏳ TOO NEW TO VERIFY',
+    too_new:
+      'This token is too fresh — analysis sources haven\'t indexed it yet, so holder, contract ' +
+      'and liquidity data are missing. That is itself a risk: unverified fresh launches are where ' +
+      'most rugs live. Treat as high risk until proven otherwise.\n\nRescan in ~15–30 min for a full report.',
+    known_so_far: 'Known so far',
   },
   ru: {
     verdict_high: '🔴 ВЫСОКИЙ РИСК',
@@ -103,10 +118,17 @@ const T = {
     admin: 'есть админ',
     sim_basis: 'Проверено живой симуляцией покупки/продажи',
     static_basis: 'Только статический анализ (симуляция недоступна на этой сети)',
+    sim_failed_basis: 'Только статический анализ (симуляция для этого токена пока недоступна)',
     disclaimer: 'Автоматическая эвристика, не финансовый совет. DYOR.',
     yes: 'да',
     no: 'нет',
     unknown: '?',
+    verdict_new: '⏳ СЛИШКОМ СВЕЖИЙ ДЛЯ ПРОВЕРКИ',
+    too_new:
+      'Токен появился только что — источники анализа его ещё не проиндексировали, поэтому данных ' +
+      'о держателях, контракте и ликвидности нет. Это само по себе риск: непроверенные свежие запуски — ' +
+      'главная среда обитания рагов. Считай высокорисковым, пока не доказано обратное.\n\nПересканируй через ~15–30 минут.',
+    known_so_far: 'Что видно уже сейчас',
   },
 };
 
@@ -123,36 +145,102 @@ function verdict(score, t) {
 const esc = (s) => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 const bool = (v, t) => (v == null ? t.unknown : v ? t.yes : t.no);
 
+function basisLine(r, t) {
+  if (r.honeypot.simulated) return t.sim_basis;
+  return r.honeypot.simSupported ? t.sim_failed_basis : t.static_basis;
+}
+
+function header(r, t, sparse) {
+  const title = [r.symbol && `$${r.symbol}`, r.name].filter(Boolean).join(' — ') || r.address;
+  const top = sparse
+    ? `<b>${t.verdict_new}</b>`
+    : `<b>${verdict(r.score, t)}</b> · ${t.risk_score}: <b>${r.score}/100</b>`;
+  return [top, `<b>${esc(title)}</b> · ${esc(r.chain.name)}`, `<code>${esc(r.address)}</code>`, ''];
+}
+
 export function formatEvmReport(r, lang, botUsername) {
   const t = T[lang];
   const ft = FLAG_TEXT[lang];
-  const lines = [];
-  const title = [r.symbol && `$${r.symbol}`, r.name].filter(Boolean).join(' — ') || r.address;
-  lines.push(`<b>${verdict(r.score, t)}</b> · ${t.risk_score}: <b>${r.score}/100</b>`);
-  lines.push(`<b>${esc(title)}</b> · ${esc(r.chain.name)}`);
-  lines.push(`<code>${esc(r.address)}</code>`);
-  lines.push('');
-  if (r.flags.length) {
-    for (const f of r.flags) lines.push(ft[f] || f);
+  const lines = header(r, t, r.dataSparse);
+
+  if (r.dataSparse) {
+    lines.push(t.too_new);
+    const known = [];
+    if (r.honeypot.simulated && r.honeypot.buyTaxPct != null && r.honeypot.sellTaxPct != null) {
+      known.push(`💸 ${t.taxes}: ${t.buy} ${r.honeypot.buyTaxPct}% · ${t.sell} ${r.honeypot.sellTaxPct}%`);
+    }
+    const realPools = (r.liquidity.topPools || []).filter((p) => p.liquidityUsd >= 100);
+    if (realPools.length) {
+      known.push(`💧 ${t.liquidity}: ${realPools.map((p) => `${esc(p.name)} $${Math.round(p.liquidityUsd).toLocaleString('en-US')}`).join(', ')}`);
+    }
+    if (known.length) {
+      lines.push('');
+      lines.push(`<b>${t.known_so_far}:</b>`);
+      lines.push(...known);
+    }
   } else {
-    lines.push(t.no_flags);
+    if (r.flags.length) {
+      for (const f of r.flags) lines.push(ft[f] || f);
+    } else {
+      lines.push(t.no_flags);
+    }
+    lines.push('');
+    const tax = [];
+    if (r.honeypot.buyTaxPct != null) tax.push(`${t.buy} ${r.honeypot.buyTaxPct}%`);
+    if (r.honeypot.sellTaxPct != null) tax.push(`${t.sell} ${r.honeypot.sellTaxPct}%`);
+    if (tax.length) lines.push(`💸 ${t.taxes}: ${tax.join(' · ')}`);
+    if (r.holders.count != null) {
+      const conc = r.holders.top10Pct != null ? ` · ${t.top10} ${r.holders.top10Pct}%` : '';
+      lines.push(`👥 ${t.holders}: ${r.holders.count}${conc}`);
+    }
+    if (r.liquidity.topPools?.length) {
+      const pools = r.liquidity.topPools.map((p) => `${esc(p.name)} $${Math.round(p.liquidityUsd).toLocaleString('en-US')}`).join(', ');
+      lines.push(`💧 ${t.liquidity}: ${pools}`);
+    }
+    lines.push(`🧾 ${t.supply}: ${t.open_source} ${bool(r.contract.openSource, t)} · ${t.proxy} ${bool(r.contract.proxy, t)} · ${t.mintable} ${bool(r.contract.mintable, t)}`);
   }
+
   lines.push('');
-  const tax = [];
-  if (r.honeypot.buyTaxPct != null) tax.push(`${t.buy} ${r.honeypot.buyTaxPct}%`);
-  if (r.honeypot.sellTaxPct != null) tax.push(`${t.sell} ${r.honeypot.sellTaxPct}%`);
-  if (tax.length) lines.push(`💸 ${t.taxes}: ${tax.join(' · ')}`);
-  if (r.holders.count != null) {
-    const conc = r.holders.top10Pct != null ? ` · ${t.top10} ${r.holders.top10Pct}%` : '';
-    lines.push(`👥 ${t.holders}: ${r.holders.count}${conc}`);
+  lines.push(`<i>${basisLine(r, t)}. ${t.disclaimer}</i>`);
+  if (botUsername) lines.push(`🔍 @${botUsername} · 📡 @${PROMO_CHANNEL}`);
+  return lines.join('\n');
+}
+
+export function formatSolReport(r, lang, botUsername) {
+  const t = T[lang];
+  const ft = FLAG_TEXT[lang];
+  const lines = header(r, t, r.dataSparse);
+
+  if (r.dataSparse) {
+    lines.push(t.too_new);
+    if (r.supply.mintAuthorityActive != null || r.supply.freezeAuthorityActive != null) {
+      lines.push('');
+      lines.push(`<b>${t.known_so_far}:</b>`);
+      lines.push(`🧾 ${t.supply}: ${t.mint_revoked} ${bool(r.supply.mintAuthorityActive == null ? null : !r.supply.mintAuthorityActive, t)} · freeze ${bool(r.supply.freezeAuthorityActive, t)}`);
+      const authFlags = r.flags.filter((f) => ['mintable', 'freeze_authority', 'owner_can_change_balance', 'closable_accounts', 'non_transferable', 'transfer_hook'].includes(f));
+      for (const f of authFlags) lines.push(ft[f] || f);
+    }
+  } else {
+    if (r.flags.length) {
+      for (const f of r.flags) lines.push(ft[f] || f);
+    } else {
+      lines.push(t.no_flags);
+    }
+    lines.push('');
+    if (r.transferFeePct != null && r.transferFeePct > 0) lines.push(`💸 ${t.taxes}: ${r.transferFeePct}%`);
+    if (r.holders.count != null) {
+      const conc = r.holders.top10Pct != null ? ` · ${t.top10} ${r.holders.top10Pct}%` : '';
+      lines.push(`👥 ${t.holders}: ${r.holders.count}${conc}`);
+    }
+    if (r.liquidity.topPools?.length) {
+      const pools = r.liquidity.topPools.map((p) => `${esc(p.name)} $${Math.round(p.liquidityUsd).toLocaleString('en-US')}`).join(', ');
+      lines.push(`💧 ${t.liquidity}: ${pools}`);
+    }
+    lines.push(`🧾 ${t.supply}: ${t.mint_revoked} ${bool(r.supply.mintAuthorityActive == null ? null : !r.supply.mintAuthorityActive, t)} · freeze ${bool(r.supply.freezeAuthorityActive, t)}`);
   }
-  if (r.liquidity.topPools?.length) {
-    const pools = r.liquidity.topPools.map((p) => `${esc(p.name)} $${Math.round(p.liquidityUsd).toLocaleString('en-US')}`).join(', ');
-    lines.push(`💧 ${t.liquidity}: ${pools}`);
-  }
-  lines.push(`🧾 ${t.supply}: ${t.open_source} ${bool(r.contract.openSource, t)} · ${t.proxy} ${bool(r.contract.proxy, t)} · ${t.mintable} ${bool(r.contract.mintable, t)}`);
+
   lines.push('');
-  lines.push(`<i>${r.honeypot.simulated ? t.sim_basis : t.static_basis}. ${t.disclaimer}</i>`);
+  lines.push(`<i>${t.static_basis}. ${t.disclaimer}</i>`);
   if (botUsername) lines.push(`🔍 @${botUsername} · 📡 @${PROMO_CHANNEL}`);
   return lines.join('\n');
 }

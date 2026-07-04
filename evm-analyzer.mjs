@@ -96,6 +96,10 @@ export async function assessEvm(chain, address) {
     ? g.dex.slice(0, 3).map((d) => ({ name: d.name, liquidityUsd: +Number(d.liquidity).toFixed(2) }))
     : [];
 
+  // GoPlus lags minutes-old launches: contract-scan fields absent, holders not counted yet.
+  // Such a stub must not render as a confident green report.
+  const dataSparse = g.is_open_source == null && !(Number(g.holder_count) > 0);
+
   return {
     chain: { id: Number(chainId), name: CHAIN_NAMES[chainId] },
     address,
@@ -105,6 +109,7 @@ export async function assessEvm(chain, address) {
       isHoneypot: yes(g.is_honeypot) || sim?.honeypotResult?.isHoneypot === true,
       basis: simulated ? 'static analysis + live buy/sell simulation' : 'static analysis',
       simulated,
+      simSupported: SIMULATION_CHAINS.has(chainId),
       buyTaxPct: buyTax,
       sellTaxPct: sellTax,
       transferTaxPct: pct(g.transfer_tax) ?? sim?.simulationResult?.transferTax ?? null,
@@ -135,5 +140,6 @@ export async function assessEvm(chain, address) {
     },
     score: s,
     flags,
+    dataSparse,
   };
 }
