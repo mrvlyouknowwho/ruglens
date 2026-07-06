@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://mrvlyouknowwho.github.io/ruglens/og.png">
 <link rel="stylesheet" href="/ruglens/styles.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is a honeypot token?", "acceptedAnswer": {"@type": "Answer", "text": "A token you can buy but cannot sell. The contract only lets the creator sell, or makes every other sell revert or get taxed at nearly 100%. Your money goes in and cannot come out."}}, {"@type": "Question", "name": "How do I check if a token is a honeypot?", "acceptedAnswer": {"@type": "Answer", "text": "Paste the contract address into a checker that runs a real on-chain sell simulation, reads the contract security flags, and inspects holder concentration and liquidity. This page does all of that for free without a sign-up."}}, {"@type": "Question", "name": "Is this honeypot checker free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It runs entirely in your browser using public data from GoPlus, honeypot.is and DexScreener. No account, no wallet connection, no fee."}}, {"@type": "Question", "name": "Which blockchains are supported?", "acceptedAnswer": {"@type": "Answer", "text": "Ethereum, BNB Chain, Base, Arbitrum, Polygon, Optimism and Avalanche here, plus TON jettons in the bot. The network is detected automatically from the address."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is a honeypot token?", "acceptedAnswer": {"@type": "Answer", "text": "A token you can buy but cannot sell. The contract only lets the creator sell, or makes every other sell revert or get taxed at nearly 100%. Your money goes in and cannot come out."}}, {"@type": "Question", "name": "How do I check if a token is a honeypot?", "acceptedAnswer": {"@type": "Answer", "text": "Paste the contract address into a checker that runs a real on-chain sell simulation, reads the contract security flags, and inspects holder concentration and liquidity. This page does all of that for free without a sign-up."}}, {"@type": "Question", "name": "Is this honeypot checker free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It runs entirely in your browser using public data from GoPlus, honeypot.is and DexScreener. No account, no wallet connection, no fee."}}, {"@type": "Question", "name": "Which blockchains are supported?", "acceptedAnswer": {"@type": "Answer", "text": "Ethereum, BNB Chain, Base, Arbitrum, Polygon, Optimism, Avalanche and Solana here, plus TON jettons in the bot. The network is detected automatically from the address."}}]}</script>
 </head>
 <body>
 <div class="wrap">
@@ -29,13 +29,14 @@
   <a href="/ruglens/ethereum-honeypot-checker.html">Ethereum</a>
   <a href="/ruglens/bsc-honeypot-checker.html">BSC</a>
   <a href="/ruglens/base-token-scam-checker.html">Base</a>
+  <a href="/ruglens/solana-token-checker.html">Solana</a>
   <a href="/ruglens/token-tax-checker.html">Buy/sell tax</a>
   <a href="/ruglens/can-i-sell-this-token.html">Can I sell?</a>
   <a href="/ruglens/check-token-before-buying.html">Before buying</a>
 </nav>
 <div class="tool">
   <div class="row">
-    <input id="addr" type="text" placeholder="0x… (EVM token contract address)" autocomplete="off" spellcheck="false">
+    <input id="addr" type="text" placeholder="0x… (EVM) or base58 Solana mint address" autocomplete="off" spellcheck="false">
     <select id="chain"><option value="auto" selected>Auto-detect</option><option value="eth">Ethereum</option><option value="bsc">BNB Chain</option><option value="base">Base</option><option value="arbitrum">Arbitrum</option><option value="polygon">Polygon</option><option value="optimism">Optimism</option><option value="avalanche">Avalanche</option></select>
     <button class="go" id="go">Check</button>
   </div>
@@ -60,7 +61,7 @@
     <a class="btn" href="https://t.me/RugLens_bot" rel="noopener">Open @RugLens_bot →</a>
   </div>
 <h2>FAQ</h2>
-<h3>What is a honeypot token?</h3><p>A token you can buy but cannot sell. The contract only lets the creator sell, or makes every other sell revert or get taxed at nearly 100%. Your money goes in and cannot come out.</p><h3>How do I check if a token is a honeypot?</h3><p>Paste the contract address into a checker that runs a real on-chain sell simulation, reads the contract security flags, and inspects holder concentration and liquidity. This page does all of that for free without a sign-up.</p><h3>Is this honeypot checker free?</h3><p>Yes. It runs entirely in your browser using public data from GoPlus, honeypot.is and DexScreener. No account, no wallet connection, no fee.</p><h3>Which blockchains are supported?</h3><p>Ethereum, BNB Chain, Base, Arbitrum, Polygon, Optimism and Avalanche here, plus TON jettons in the bot. The network is detected automatically from the address.</p>
+<h3>What is a honeypot token?</h3><p>A token you can buy but cannot sell. The contract only lets the creator sell, or makes every other sell revert or get taxed at nearly 100%. Your money goes in and cannot come out.</p><h3>How do I check if a token is a honeypot?</h3><p>Paste the contract address into a checker that runs a real on-chain sell simulation, reads the contract security flags, and inspects holder concentration and liquidity. This page does all of that for free without a sign-up.</p><h3>Is this honeypot checker free?</h3><p>Yes. It runs entirely in your browser using public data from GoPlus, honeypot.is and DexScreener. No account, no wallet connection, no fee.</p><h3>Which blockchains are supported?</h3><p>Ethereum, BNB Chain, Base, Arbitrum, Polygon, Optimism, Avalanche and Solana here, plus TON jettons in the bot. The network is detected automatically from the address.</p>
 </section>
 <footer>
   <div>Open source: <a href="https://github.com/mrvlyouknowwho/ruglens" rel="noopener">github.com/mrvlyouknowwho/ruglens</a> · Telegram: <a href="https://t.me/RugLens_bot" rel="noopener">@RugLens_bot</a> · Fresh pools: <a href="https://t.me/FreshPoolsFeed" rel="noopener">@FreshPoolsFeed</a></div>

@@ -1,12 +1,13 @@
 const GOPLUS_CHAIN = { eth:'1', bsc:'56', base:'8453', arbitrum:'42161', polygon:'137', optimism:'10', avalanche:'43114' };
 const HONEYPOT_CHAIN = { eth:'1', bsc:'56', base:'8453' };
-const DEX_TO_CHAIN = { ethereum:'eth', bsc:'bsc', base:'base', arbitrum:'arbitrum', polygon:'polygon', optimism:'optimism', avalanche:'avalanche' };
-const CHAIN_LABEL = { eth:'Ethereum', bsc:'BNB Chain', base:'Base', arbitrum:'Arbitrum', polygon:'Polygon', optimism:'Optimism', avalanche:'Avalanche' };
+const DEX_TO_CHAIN = { ethereum:'eth', bsc:'bsc', base:'base', arbitrum:'arbitrum', polygon:'polygon', optimism:'optimism', avalanche:'avalanche', solana:'solana' };
+const CHAIN_LABEL = { eth:'Ethereum', bsc:'BNB Chain', base:'Base', arbitrum:'Arbitrum', polygon:'Polygon', optimism:'Optimism', avalanche:'Avalanche', solana:'Solana' };
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const isEvm = (a) => /^0x[0-9a-fA-F]{40}$/.test(a);
 const isTon = (a) => /^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(a);
+const isSol = (a) => !isTon(a) && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a);
 
 async function jget(url){
   const r = await fetch(url, { signal: AbortSignal.timeout(15000) });
@@ -57,14 +58,69 @@ function scoreGoPlus(t){
   return { score, flags, buyTax: buy, sellTax: sell };
 }
 
-function verdict(score){
+function verdict(score, sparse){
+  if(sparse) return ['b-warn','⏳ TOO NEW TO VERIFY'];
   if(score >= 70) return ['b-bad','⛔ HIGH RISK'];
   if(score >= 25) return ['b-warn','⚠️ CAUTION'];
   return ['b-ok','✓ NO MECHANICAL SCAM FOUND'];
 }
 
+function scoreSolana(t){
+  const on = (v) => v === '1' || v === 1 || v === true;
+  const auth = (a) => (a && on(a.status) ? true : a ? false : null);
+  let score = 0; const flags = [];
+  const add = (w, sev, txt) => { score += w; flags.push([sev, txt]); };
+  if(on(t.non_transferable)) add(30,'bad','⛔ Token is non-transferable');
+  if(auth(t.balance_mutable_authority)) add(30,'bad','🕵️ An authority can change wallet balances');
+  if(auth(t.freezable)) add(25,'bad','🧊 Freeze authority active — your tokens can be frozen');
+  if(auth(t.closable)) add(25,'bad','🚪 Token accounts can be force-closed by an authority');
+  if(auth(t.mintable)) add(15,'warn','🪙 Mint authority active — supply can be inflated');
+  if(Array.isArray(t.transfer_hook) && t.transfer_hook.length) add(15,'warn','🪝 Transfer hook installed (custom code runs on every transfer)');
+  const feePct = t.transfer_fee?.fee_rate != null ? +(Number(t.transfer_fee.fee_rate) * 100).toFixed(2) : null;
+  if((feePct ?? 0) > 0) add(10,'warn',`💸 Transfer fee: ${feePct}%`);
+  const holders = t.holder_count != null ? Number(t.holder_count) : null;
+  const top10 = Array.isArray(t.holders) && t.holders.length
+    ? +(t.holders.slice(0,10).reduce((a,h)=> a + (Number(h.percent)||0), 0) * 100).toFixed(1)
+    : null;
+  if(top10 != null && top10 > 80 && (holders ?? 0) > 50) add(15,'warn',`🐋 Top 10 wallets hold ${top10}% of supply`);
+  const pools = Array.isArray(t.dex) ? t.dex : null;
+  const tvl = pools ? pools.reduce((a,d)=> a + (Number(d.tvl)||0), 0) : null;
+  if(pools && !pools.length) add(30,'warn','💧 No DEX liquidity found');
+  if(on(t.trusted_token)){ score = 0; flags.length = 0; flags.push(['ok','✅ Whitelisted as a trusted token (major established asset)']); }
+  const sparse = !(holders > 0) && !(pools && pools.length);
+  return { score: Math.min(100, score), flags, holders, top10, tvl, sparse,
+           symbol: t.metadata?.symbol || null, name: t.metadata?.name || null };
+}
+
+async function runSolana(addr, out){
+  out.innerHTML = `<div class="card"><span class="spin"></span> Scanning Solana on-chain data…</div>`;
+  const [gpRes, dexRes] = await Promise.allSettled([
+    jget(`https://api.gopluslabs.io/api/v1/solana/token_security?contract_addresses=${addr}`),
+    dexLiquidity(addr, 'solana')
+  ]);
+  if(gpRes.status !== 'fulfilled' || !gpRes.value.result?.[addr]){
+    out.innerHTML = `<div class="card">This mint isn’t indexed on Solana yet (or the address is wrong). Very fresh tokens take a few minutes to appear — treat unverifiable tokens as risky by default.
+      <div class="cta"><div>Scan it in the bot (with a re-scan button):</div>
+      <a class="btn" href="https://t.me/RugLens_bot?start=${encodeURIComponent(addr)}" rel="noopener">Open @RugLens_bot →</a></div></div>`;
+    return;
+  }
+  const s = scoreSolana(gpRes.value.result[addr]);
+  const data = { address: addr, chain: 'solana', score: s.score, flags: s.flags,
+    buyTax: null, sellTax: null, holders: s.holders, liqUsd: s.tvl, symbol: s.symbol, name: s.name,
+    simulated: null, sparse: s.sparse, top10: s.top10 };
+  if(dexRes.status === 'fulfilled' && dexRes.value){
+    const p = dexRes.value;
+    if(data.liqUsd == null) data.liqUsd = p.liquidity?.usd ?? null;
+    if(!data.symbol && p.baseToken?.symbol) data.symbol = p.baseToken.symbol;
+    if(!data.name && p.baseToken?.name) data.name = p.baseToken.name;
+    if(p.liquidity?.usd > 0) data.sparse = false;
+  }
+  if(data.sparse) data.flags.push(['warn','⏳ Not indexed yet (no holders / no liquidity data) — a minutes-old mint. Unverifiable = risky by default.']);
+  render(data);
+}
+
 function render(data){
-  const [cls,label] = verdict(data.score);
+  const [cls,label] = verdict(data.score, data.sparse);
   let flagsHtml = '';
   if(data.flags.length){
     flagsHtml = '<ul class="flags">' + data.flags
@@ -79,6 +135,7 @@ function render(data){
   if(data.buyTax!=null) kv.push(`Buy tax: <b>${data.buyTax.toFixed(1)}%</b>`);
   if(data.sellTax!=null) kv.push(`Sell tax: <b>${data.sellTax.toFixed(1)}%</b>`);
   if(data.holders!=null) kv.push(`Holders: <b>${Number(data.holders).toLocaleString('en-US')}</b>`);
+  if(data.top10!=null) kv.push(`Top-10 hold: <b>${data.top10}%</b>`);
   if(data.liqUsd!=null) kv.push(`Liquidity: <b>$${Math.round(data.liqUsd).toLocaleString('en-US')}</b>`);
   if(data.simulated) kv.push(`Sell sim: <b>${data.simulated}</b>`);
 
@@ -110,8 +167,15 @@ async function run(){
       <a class="btn" href="https://t.me/RugLens_bot?start=${encodeURIComponent(addr)}" rel="noopener">Open @RugLens_bot →</a></div></div>`;
     return;
   }
+  if(isSol(addr)){
+    $('go').disabled = true;
+    try{ await runSolana(addr, out); }
+    catch(e){ out.innerHTML = `<div class="card">Couldn’t complete the scan (${esc(e.message||e)}). Try again in a moment, or use <a href="https://t.me/RugLens_bot" rel="noopener">@RugLens_bot</a>.</div>`; }
+    finally{ $('go').disabled = false; }
+    return;
+  }
   if(!isEvm(addr)){
-    out.innerHTML = `<div class="card">That doesn’t look like a valid contract address. EVM addresses start with <code>0x</code> and are 42 characters long.</div>`;
+    out.innerHTML = `<div class="card">That doesn’t look like a valid token address. EVM addresses start with <code>0x</code> (42 chars); Solana mints are base58 (32–44 chars).</div>`;
     return;
   }
 

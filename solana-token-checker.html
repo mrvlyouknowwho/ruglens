@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="E40kjdjJsAwjPTLm4RJxpvMVkEE53j8yoeSeud-LMJs">
+<title>Solana Token Checker — Rug, Freeze &amp; Mint Authority Scan | RugLens</title>
+<meta name="description" content="Free Solana token checker. Paste any SPL mint address to see freeze authority, mint authority, transfer fees, holder concentration and DEX liquidity — the checks that catch Solana rugs. No sign-up, no wallet.">
+<link rel="canonical" href="https://mrvlyouknowwho.github.io/ruglens/solana-token-checker.html">
+<meta property="og:title" content="Solana Token Checker — Rug, Freeze &amp; Mint Authority Scan | RugLens">
+<meta property="og:description" content="Free Solana token checker. Paste any SPL mint address to see freeze authority, mint authority, transfer fees, holder concentration and DEX liquidity — the checks that catch Solana rugs. No sign-up, no wallet.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://mrvlyouknowwho.github.io/ruglens/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://mrvlyouknowwho.github.io/ruglens/og.png">
+<link rel="stylesheet" href="/ruglens/styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I check a Solana token for a rug?", "acceptedAnswer": {"@type": "Answer", "text": "Paste the token's mint address above. The tool reads its on-chain authorities — freeze, mint, balance-mutable, closable — plus transfer fees, holder concentration and DEX liquidity. An active freeze or mint authority on a random memecoin is the classic rug setup."}}, {"@type": "Question", "name": "What is freeze authority on Solana?", "acceptedAnswer": {"@type": "Answer", "text": "A permission that lets the token creator freeze any holder's token account. Frozen tokens can't be sold or transferred — it is the Solana equivalent of a honeypot. Legitimate memecoins revoke freeze authority at launch."}}, {"@type": "Question", "name": "Why does my token say TOO NEW TO VERIFY?", "acceptedAnswer": {"@type": "Answer", "text": "The mint is so fresh that public indexers haven't caught up — no holder or liquidity data exists yet. That's not a pass: unverifiable tokens should be treated as risky until data appears. Re-check after a few minutes."}}, {"@type": "Question", "name": "Is this Solana checker free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It runs entirely in your browser using public GoPlus and DexScreener data. No account, no wallet connection, no fee."}}]}</script>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Solana Token Checker</h1>
+  <p class="sub">Paste any Solana mint address. See freeze and mint authority, transfer fees, holder concentration and liquidity — the traps behind most Solana rugs — in seconds, in your browser.</p>
+</header>
+<nav class="pill-nav">
+  <a href="/ruglens/">All chains</a>
+  <a href="/ruglens/ethereum-honeypot-checker.html">Ethereum</a>
+  <a href="/ruglens/bsc-honeypot-checker.html">BSC</a>
+  <a href="/ruglens/base-token-scam-checker.html">Base</a>
+  <a href="/ruglens/solana-token-checker.html">Solana</a>
+  <a href="/ruglens/token-tax-checker.html">Buy/sell tax</a>
+  <a href="/ruglens/can-i-sell-this-token.html">Can I sell?</a>
+  <a href="/ruglens/check-token-before-buying.html">Before buying</a>
+</nav>
+<div class="tool">
+  <div class="row">
+    <input id="addr" type="text" placeholder="Solana mint address (base58)" autocomplete="off" spellcheck="false">
+    <select id="chain"><option value="auto" selected>Auto-detect</option><option value="eth">Ethereum</option><option value="bsc">BNB Chain</option><option value="base">Base</option><option value="arbitrum">Arbitrum</option><option value="polygon">Polygon</option><option value="optimism">Optimism</option><option value="avalanche">Avalanche</option></select>
+    <button class="go" id="go">Check</button>
+  </div>
+  <div class="hint">Runs in your browser using public data from GoPlus, honeypot.is and DexScreener. Nothing is stored.</div>
+  <div id="out"></div>
+</div>
+<section class="copy">
+<h2>Solana rugs work differently — check the authorities, not the contract</h2>
+<p>On EVM chains a scam hides in contract code. On Solana the danger sits in the token's <strong>authorities</strong>: whoever holds them can rewrite the rules after you buy. A memecoin minted five minutes ago can look perfect on a chart while its creator still holds the keys to freeze your wallet or print supply into your exit.</p>
+<h2>What gets checked for every SPL token</h2>
+<ul>
+  <li><strong>Freeze authority</strong> — if it's active, the creator can freeze your token account and your tokens simply stop moving. The classic Solana honeypot.</li>
+  <li><strong>Mint authority</strong> — an active mint means supply can be inflated at will, diluting every holder instantly.</li>
+  <li><strong>Balance-mutable / closable accounts</strong> — Token-2022 extensions that let an authority edit or force-close holder accounts.</li>
+  <li><strong>Transfer fees and hooks</strong> — hidden taxes and custom code that runs on every transfer.</li>
+  <li><strong>Holder concentration and liquidity</strong> — top-10 wallet share and real DEX liquidity, so a token held by three wallets is obvious.</li>
+</ul>
+<h2>Minutes-old mints: “too new to verify” is a verdict, not an error</h2>
+<p>Public indexers take several minutes to catch up with a brand-new mint. If holders and liquidity haven't appeared yet, this tool says <strong>TOO NEW TO VERIFY</strong> instead of showing a misleading green result. An unverifiable token is a risk by default — wait a few minutes and re-check before putting money in.</p>
+<div class="cta">
+    <div>Trading memecoins from your phone? Scan Solana mints inline in any Telegram chat — plus EVM and TON — with the bot.</div>
+    <a class="btn" href="https://t.me/RugLens_bot" rel="noopener">Open @RugLens_bot →</a>
+  </div>
+<h2>FAQ</h2>
+<h3>How do I check a Solana token for a rug?</h3><p>Paste the token's mint address above. The tool reads its on-chain authorities — freeze, mint, balance-mutable, closable — plus transfer fees, holder concentration and DEX liquidity. An active freeze or mint authority on a random memecoin is the classic rug setup.</p><h3>What is freeze authority on Solana?</h3><p>A permission that lets the token creator freeze any holder's token account. Frozen tokens can't be sold or transferred — it is the Solana equivalent of a honeypot. Legitimate memecoins revoke freeze authority at launch.</p><h3>Why does my token say TOO NEW TO VERIFY?</h3><p>The mint is so fresh that public indexers haven't caught up — no holder or liquidity data exists yet. That's not a pass: unverifiable tokens should be treated as risky until data appears. Re-check after a few minutes.</p><h3>Is this Solana checker free?</h3><p>Yes. It runs entirely in your browser using public GoPlus and DexScreener data. No account, no wallet connection, no fee.</p>
+</section>
+<footer>
+  <div>Open source: <a href="https://github.com/mrvlyouknowwho/ruglens" rel="noopener">github.com/mrvlyouknowwho/ruglens</a> · Telegram: <a href="https://t.me/RugLens_bot" rel="noopener">@RugLens_bot</a> · Fresh pools: <a href="https://t.me/FreshPoolsFeed" rel="noopener">@FreshPoolsFeed</a></div>
+  <div class="disc">Not financial advice. Automated screening can miss risks and can flag safe tokens. Always do your own research.</div>
+</footer>
+</div>
+<script src="/ruglens/checker.js"></script>
+</body>
+</html>
